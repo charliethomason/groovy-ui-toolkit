@@ -1,0 +1,19 @@
+{
+  "name": "groovy-ui-toolkit",
+  "version": "1.0.0",
+  "description": "A kit of UI tools that are groovy",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charliethomason/groovy-ui-toolkit.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/charliethomason/groovy-ui-toolkit/issues"
+  },
+  "homepage": "https://github.com/charliethomason/groovy-ui-toolkit#readme"
+}
