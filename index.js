@@ -1,5 +1,3 @@
-function helloWorld() {
-  return "Hello, World"
-}
+import * as Format from './formats/formats.js';
 
-module.exports = helloWorld;
+console.log(Format.addComma(1000)); // '1,000'
