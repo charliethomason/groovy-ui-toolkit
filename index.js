@@ -1,6 +1,13 @@
 import { addComma } from './utils/numericFormatters.js';
-import * as OTP from './otpInput/otpInput.js';
+import { OtpInput } from './otpInput/otpInput.js';
+
+const OTPInput = new OtpInput();
+
+document.addEventListener('DOMContentLoaded', () => {
+  OTPInput.createElements();
+});
 
 module.exports = {
   addComma,
+  OTPInput,
 };

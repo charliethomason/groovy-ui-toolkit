@@ -1,4 +1,4 @@
-class OtpInput {
+export class OtpInput {
   form = document.createElement('form');
   inputLength = 6;
 
@@ -19,9 +19,3 @@ class OtpInput {
     document.body.appendChild(this.form);
   }
 }
-
-const OTPInput = new OtpInput();
-
-document.addEventListener('DOMContentLoaded', () => {
-  OTPInput.createElements();
-});
