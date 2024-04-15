@@ -1,5 +1,6 @@
-import { addComma } from './utils/numericFormatters.js';
+import { addComma, formatPhoneNum } from './utils/numericFormatters.js';
 
 module.exports = {
   addComma,
+  formatPhoneNum,
 };
