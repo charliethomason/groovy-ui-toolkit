@@ -18,4 +18,14 @@ export class OtpInput {
     }
     document.body.appendChild(this.form);
   }
+
+  handleKeyPress(e, idx) {
+    const target = e.target;
+    const isDigit = e.key.match(/[0-9]/);
+    if (e.key === 'Backspace' && target.previousElementSibling) {
+      target.previousElementSibling.focus();
+    } else if (e.key.match(/[0-9]/) && target.nextElementSibling) {
+      target.nextElementSibling.focus();
+    }
+  }
 }
