@@ -1,5 +1,5 @@
-function helloWorld() {
-  return "Hello, World"
-}
+import { addComma } from './utils/numericFormatters.js';
 
-module.exports = helloWorld;
+module.exports = {
+  addComma,
+};
