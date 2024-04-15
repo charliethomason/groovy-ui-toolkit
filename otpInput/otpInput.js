@@ -1,12 +1,14 @@
 class OtpInput {
   form = document.createElement('form');
+  inputLength = 6;
 
-  constructor() {
+  constructor(inputLength = 6) {
     this.form.className = 'otp-form';
+    this.inputLength = inputLength;
   }
 
   createElements() {
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < this.inputLength; i++) {
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'otp-input';
