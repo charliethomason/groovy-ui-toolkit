@@ -2,23 +2,42 @@ export class OtpInput {
   form = document.createElement('form');
   inputQty = 6;
   inputs = [];
+  input = document.createElement('input');
+  otp = '';
 
   constructor(inputQty = 6) {
     this.form.className = 'otp-form';
     this.inputQty = inputQty;
+    this.input.type = 'hidden';
+    this.input.name = 'otp';
+  }
+
+  getOtp() {
+    return this.input.value;
+  }
+
+  setOtp(otp) {
+    this.otp = otp;
+  }
+
+  resetOtp() {
+    this.input.value = '';
+    this.otp = '';
+    this.inputs.forEach((input) => {
+      input.value = '';
+    });
   }
 
   createElements() {
     for (let i = 0; i < this.inputQty; i++) {
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'otp-input';
-      input.maxLength = 1;
-      input.pattern = 'd*';
-      input.name = 'otp';
-      input.id = `otp-input-${i}`;
-      this.form.appendChild(input);
-      this.inputs.push(input);
+      const inputElem = document.createElement('input');
+      inputElem.type = 'number';
+      inputElem.className = 'otp-input';
+      inputElem.maxLength = 1;
+      inputElem.pattern = 'd*';
+      inputElem.id = `otp-input-${i}`;
+      this.form.appendChild(inputElem);
+      this.inputs.push(inputElem);
     }
     document.body.appendChild(this.form);
     this.addEventListeners();
@@ -26,21 +45,21 @@ export class OtpInput {
 
   addEventListeners() {
     for (let i = 0; i < this.inputs.length; i++) {
-      const input = this.inputs[i];
+      const currentInput = this.inputs[i];
 
-      input.addEventListener('input', () => {
-        if (input.value.length == 1 && i + 1 < this.inputs.length) {
+      currentInput.addEventListener('input', () => {
+        if (currentInput.value.length == 1 && i + 1 < this.inputs.length) {
           this.inputs[i + 1].focus();
         }
 
-        if (input.value.length > 1) {
-          if (isNaN(input.value)) {
+        if (currentInput.value.length > 1) {
+          if (isNaN(currentInput.value)) {
             input.value = '';
             this.updateInput();
             return;
           }
 
-          const chars = input.value.split('');
+          const chars = currentInput.value.split('');
 
           for (let pos = 0; pos < chars.length; pos++) {
             if (pos + i >= this.inputs.length) break;
@@ -49,14 +68,14 @@ export class OtpInput {
             targetInput.value = chars[pos];
           }
 
-          let focus_index = Math.min(this.inputs.length - 1, i + chars.length);
-          this.inputs[focus_index].focus();
+          let focusIndex = Math.min(this.inputs.length - 1, i + chars.length);
+          this.inputs[focusIndex].focus();
         }
         this.updateInput();
       });
 
-      input.addEventListener('keydown', (e) => {
-        if (e.keyCode == 8 && input.value == '' && i != 0) {
+      currentInput.addEventListener('keydown', (e) => {
+        if (e.keyCode == 8 && currentInput.value == '' && i != 0) {
           for (let pos = i; pos < this.inputs.length - 1; pos++) {
             this.inputs[pos].value = this.inputs[pos + 1].value;
           }
@@ -73,7 +92,7 @@ export class OtpInput {
           }
 
           this.inputs[this.inputs.length - 1].value = '';
-          input.select();
+          currentInput.select();
           e.preventDefault();
           this.updateInput();
           return;
@@ -101,10 +120,15 @@ export class OtpInput {
   }
 
   updateInput() {
-    let inputValue = Array.from(this.inputs).reduce(function (otp, input) {
+    let inputValue = Array.from(this.inputs).reduce((otp, input) => {
       otp += input.value.length ? input.value : ' ';
       return otp;
     }, '');
-    document.querySelector('input[name=otp]').value = inputValue;
+    this.input.value = inputValue;
+  }
+
+  generateAndUse() {
+    this.createElements();
+    this.addEventListeners();
   }
 }

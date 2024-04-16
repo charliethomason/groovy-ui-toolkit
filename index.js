@@ -4,7 +4,8 @@ import { OtpInput } from './otpInput/otpInput.js';
 const OTPInput = new OtpInput(6);
 
 document.addEventListener('DOMContentLoaded', () => {
-  OTPInput.createElements();
+  OTPInput.generateAndUse();
+  OTPInput.setOtp('123456');
 });
 
 module.exports = {
