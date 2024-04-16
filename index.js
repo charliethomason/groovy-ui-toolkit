@@ -1,7 +1,7 @@
-import { addComma } from './utils/numericFormatters.js';
-import { OtpInput } from './otpInput/otpInput.js';
+const { addComma } = require('./utils/numericFormatters.js');
+const { OtpInput } = require('./otpInput/otpInput.js');
 
 module.exports = {
   addComma,
-  OTPInput,
+  OtpInput,
 };
