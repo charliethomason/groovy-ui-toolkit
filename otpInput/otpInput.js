@@ -139,7 +139,7 @@ export class OtpInput {
     }
   }
 
-  generateAndUse() {
+  renderAndUse() {
     document.addEventListener('DOMContentLoaded', () => {
       this.createElements();
       this.addEventListeners();
