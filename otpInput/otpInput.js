@@ -4,6 +4,7 @@ export class OtpInput {
   inputs = [];
   input = document.createElement('input');
   otp = '';
+  inputMatchesOtp = false;
 
   constructor(inputQty = 6) {
     this.form.className = 'otp-form';
@@ -125,6 +126,17 @@ export class OtpInput {
       return otp;
     }, '');
     this.input.value = inputValue;
+    if (this.input.value.length === this.inputQty) {
+      this.checkForMatch();
+    }
+  }
+
+  checkForMatch() {
+    if (this.otp === this.input.value) {
+      this.inputMatchesOtp = true;
+    } else {
+      this.inputMatchesOtp = false;
+    }
   }
 
   generateAndUse() {
