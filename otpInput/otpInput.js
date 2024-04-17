@@ -1,20 +1,20 @@
-export class OtpInput {
-  form = document.createElement('form');
-  inputQty = 6;
-  inputs = [];
-  input = document.createElement('input');
-  otp = '';
-  inputMatchesOtp = false;
+import { keycodes } from '../utils/keycodes.js';
 
+export class OtpInput {
   constructor(inputQty = 6) {
+    this.form = document.createElement('form');
     this.form.className = 'otp-form';
     this.inputQty = inputQty;
-    this.input.type = 'hidden';
-    this.input.name = 'otp';
+    this.inputs = [];
+    this.hiddenInput = document.createElement('input');
+    this.hiddenInput.type = 'hidden';
+    this.hiddenInput.name = 'otp';
+    this.otp = '';
+    this.inputMatchesOtp = false;
   }
 
   getOtp() {
-    return this.input.value;
+    return this.hiddenInput.value;
   }
 
   setOtp(otp) {
@@ -22,7 +22,7 @@ export class OtpInput {
   }
 
   resetOtp() {
-    this.input.value = '';
+    this.hiddenInput.value = '';
     this.otp = '';
     this.inputs.forEach((input) => {
       input.value = '';
@@ -47,37 +47,47 @@ export class OtpInput {
   addEventListeners() {
     for (let i = 0; i < this.inputs.length; i++) {
       const currentInput = this.inputs[i];
+      const inputLength = this.inputs.length;
 
       currentInput.addEventListener('input', () => {
-        if (currentInput.value.length == 1 && i + 1 < this.inputs.length) {
+        // for when user types in value one by one
+        if (currentInput.value.length == 1 && i + 1 < inputLength) {
           this.inputs[i + 1].focus();
         }
 
         if (currentInput.value.length > 1) {
+          // sanatize the input
           if (isNaN(currentInput.value)) {
             input.value = '';
             this.updateInput();
             return;
           }
 
+          // for when user pastes in value
+          // create an array of characters
           const chars = currentInput.value.split('');
 
+          // loop through the array and assign each character to the input
           for (let pos = 0; pos < chars.length; pos++) {
-            if (pos + i >= this.inputs.length) break;
+            if (pos + i >= inputLength) break;
 
             let targetInput = this.inputs[pos + i];
             targetInput.value = chars[pos];
           }
 
-          let focusIndex = Math.min(this.inputs.length - 1, i + chars.length);
+          let focusIndex = Math.min(inputLength - 1, i + chars.length);
           this.inputs[focusIndex].focus();
         }
         this.updateInput();
       });
 
       currentInput.addEventListener('keydown', (e) => {
-        if (e.keyCode == 8 && currentInput.value == '' && i != 0) {
-          for (let pos = i; pos < this.inputs.length - 1; pos++) {
+        if (
+          e.keyCode === keycodes.backspace &&
+          currentInput.value == '' &&
+          i != 0
+        ) {
+          for (let pos = i; pos < inputLength - 1; pos++) {
             this.inputs[pos].value = this.inputs[pos + 1].value;
           }
 
@@ -87,19 +97,19 @@ export class OtpInput {
           return;
         }
 
-        if (e.keyCode == 46 && i != this.inputs.length - 1) {
-          for (let pos = i; pos < this.inputs.length - 1; pos++) {
+        if (e.keyCode === keycodes.delete && i !== inputLength - 1) {
+          for (let pos = i; pos < inputLength - 1; pos++) {
             this.inputs[pos].value = this.inputs[pos + 1].value;
           }
 
-          this.inputs[this.inputs.length - 1].value = '';
+          this.inputs[inputLength - 1].value = '';
           currentInput.select();
           e.preventDefault();
           this.updateInput();
           return;
         }
 
-        if (e.keyCode == 37) {
+        if (e.keyCode === keycodes.left) {
           if (i > 0) {
             e.preventDefault();
             this.inputs[i - 1].focus();
@@ -108,8 +118,8 @@ export class OtpInput {
           return;
         }
 
-        if (e.keyCode == 39) {
-          if (i + 1 < this.inputs.length) {
+        if (e.keyCode === keycodes.right) {
+          if (i + 1 < inputLength) {
             e.preventDefault();
             this.inputs[i + 1].focus();
             this.inputs[i + 1].select();
@@ -125,14 +135,14 @@ export class OtpInput {
       otp += input.value.length ? input.value : ' ';
       return otp;
     }, '');
-    this.input.value = inputValue;
-    if (this.input.value.length === this.inputQty) {
+    this.hiddenInput.value = inputValue;
+    if (this.hiddenInput.value.length === this.inputQty) {
       this.checkForMatch();
     }
   }
 
   checkForMatch() {
-    if (this.otp === this.input.value) {
+    if (this.otp === this.hiddenInput.value) {
       this.inputMatchesOtp = true;
     } else {
       this.inputMatchesOtp = false;
@@ -142,7 +152,6 @@ export class OtpInput {
   renderAndUse() {
     document.addEventListener('DOMContentLoaded', () => {
       this.createElements();
-      this.addEventListeners();
     });
   }
 }
