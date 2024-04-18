@@ -13,22 +13,6 @@ export class OtpInput {
     this.inputMatchesOtp = false;
   }
 
-  getOtp() {
-    return this.hiddenInput.value;
-  }
-
-  setOtp(otp) {
-    this.otp = otp;
-  }
-
-  resetOtp() {
-    this.hiddenInput.value = '';
-    this.otp = '';
-    this.inputs.forEach((input) => {
-      input.value = '';
-    });
-  }
-
   createElements() {
     for (let i = 0; i < this.inputQty; i++) {
       const inputElem = document.createElement('input');
@@ -51,10 +35,10 @@ export class OtpInput {
 
       currentInput.addEventListener('input', () => {
         // for when user types in value one by one
-        if (currentInput.value.length == 1 && i + 1 < inputLength) {
+        if (currentInput.value.length === 1 && i + 1 < inputLength) {
           this.inputs[i + 1].focus();
         }
-
+        // for when user pastes in value
         if (currentInput.value.length > 1) {
           // sanatize the input
           if (isNaN(currentInput.value)) {
@@ -63,49 +47,40 @@ export class OtpInput {
             return;
           }
 
-          // for when user pastes in value
           // create an array of characters
           const chars = currentInput.value.split('');
 
+          let scheduledFocus = Math.min(inputLength - 1, i + chars.length);
+
+          // start pasting from index 0 if the current input is not the first input
+          let pasteStartIndex = currentInput !== 0 ? 0 : i;
+
           // loop through the array and assign each character to the input
           for (let pos = 0; pos < chars.length; pos++) {
-            if (pos + i >= inputLength) break;
+            if (pos + pasteStartIndex >= inputLength) break;
 
-            let targetInput = this.inputs[pos + i];
+            // paste value
+            let targetInput = this.inputs[pos + pasteStartIndex];
             targetInput.value = chars[pos];
           }
 
-          let focusIndex = Math.min(inputLength - 1, i + chars.length);
-          this.inputs[focusIndex].focus();
+          // focus on the next input after pasting value
+          this.inputs[scheduledFocus].focus();
         }
         this.updateInput();
       });
 
       currentInput.addEventListener('keydown', (e) => {
-        if (
-          e.keyCode === keycodes.backspace &&
-          currentInput.value == '' &&
-          i != 0
-        ) {
-          for (let pos = i; pos < inputLength - 1; pos++) {
-            this.inputs[pos].value = this.inputs[pos + 1].value;
-          }
-
-          this.inputs[i - 1].value = '';
+        if (e.keyCode === keycodes.backspace && i > 0) {
+          this.shiftInputValues(i);
           this.inputs[i - 1].focus();
-          this.updateInput();
           return;
         }
 
-        if (e.keyCode === keycodes.delete && i !== inputLength - 1) {
-          for (let pos = i; pos < inputLength - 1; pos++) {
-            this.inputs[pos].value = this.inputs[pos + 1].value;
-          }
-
-          this.inputs[inputLength - 1].value = '';
+        if (e.keyCode === keycodes.delete && i !== this.inputs.length - 1) {
+          this.shiftInputValues(i + 1);
           currentInput.select();
           e.preventDefault();
-          this.updateInput();
           return;
         }
 
@@ -128,6 +103,14 @@ export class OtpInput {
         }
       });
     }
+  }
+
+  shiftInputValues(startIndex) {
+    for (let pos = startIndex; pos < this.inputs.length - 1; pos++) {
+      this.inputs[pos].value = this.inputs[pos + 1].value;
+    }
+    this.inputs[this.inputs.length - 1].value = '';
+    this.updateInput();
   }
 
   updateInput() {
