@@ -25,102 +25,112 @@ export class OtpInput {
       this.inputs.push(inputElem);
     }
     document.body.appendChild(this.form);
-    this.addEventListeners();
+    OtpInput.addEventListeners(this);
   }
 
-  addEventListeners() {
-    for (let i = 0; i < this.inputs.length; i++) {
-      const currentInput = this.inputs[i];
-      const inputLength = this.inputs.length;
+  static addEventListeners(instance) {
+    for (let i = 0; i < instance.inputs.length; i++) {
+      const currentInput = instance.inputs[i];
+      const inputLength = instance.inputs.length;
 
       currentInput.addEventListener('input', () => {
         // for when user types in value one by one
         if (currentInput.value.length === 1 && i + 1 < inputLength) {
-          this.inputs[i + 1].focus();
+          instance.inputs[i + 1].focus();
         }
         // for when user pastes in value
         if (currentInput.value.length > 1) {
-          // sanatize the input
-          if (isNaN(currentInput.value)) {
-            input.value = '';
-            this.updateInput();
-            return;
-          }
-
-          // create an array of characters
-          const chars = currentInput.value.split('');
-
-          let scheduledFocus = Math.min(inputLength - 1, i + chars.length);
-
-          // start pasting from index 0 if the current input is not the first input
-          let pasteStartIndex = currentInput !== 0 ? 0 : i;
-
-          // loop through the array and assign each character to the input
-          for (let pos = 0; pos < chars.length; pos++) {
-            if (pos + pasteStartIndex >= inputLength) break;
-
-            // paste value
-            let targetInput = this.inputs[pos + pasteStartIndex];
-            targetInput.value = chars[pos];
-          }
-
-          // focus on the next input after pasting value
-          this.inputs[scheduledFocus].focus();
+          OtpInput.handlePaste(instance, currentInput, i);
         }
-        this.updateInput();
+        OtpInput.updateInput(instance);
       });
 
       currentInput.addEventListener('keydown', (e) => {
-        if (e.keyCode === keycodes.backspace && i > 0) {
-          this.shiftInputValues(i);
-          this.inputs[i - 1].focus();
-          return;
-        }
-
-        if (e.keyCode === keycodes.delete && i !== this.inputs.length - 1) {
-          this.shiftInputValues(i + 1);
-          currentInput.select();
-          e.preventDefault();
-          return;
-        }
-
-        if (e.keyCode === keycodes.left) {
-          if (i > 0) {
-            e.preventDefault();
-            this.inputs[i - 1].focus();
-            this.inputs[i - 1].select();
-          }
-          return;
-        }
-
-        if (e.keyCode === keycodes.right) {
-          if (i + 1 < inputLength) {
-            e.preventDefault();
-            this.inputs[i + 1].focus();
-            this.inputs[i + 1].select();
-          }
-          return;
-        }
+        OtpInput.handleKeydown(instance, currentInput, i, e);
       });
     }
   }
 
-  shiftInputValues(startIndex) {
-    for (let pos = startIndex; pos < this.inputs.length - 1; pos++) {
-      this.inputs[pos].value = this.inputs[pos + 1].value;
+  static handlePaste(instance, currentInput, i) {
+    if (isNaN(currentInput.value)) {
+      // sanatize the input
+      input.value = '';
+      OtpInput.updateInput(instance);
+      return;
     }
-    this.inputs[this.inputs.length - 1].value = '';
-    this.updateInput();
+
+    // create an array of characters
+    const chars = currentInput.value.split('');
+
+    let scheduledFocus = Math.min(instance.inputs.length - 1, i + chars.length);
+
+    // start pasting from index 0 if the current input is not the first input
+    let pasteStartIndex = currentInput !== 0 ? 0 : i;
+
+    // loop through the array and assign each character to the input
+    for (let pos = 0; pos < chars.length; pos++) {
+      if (pos + pasteStartIndex >= instance.inputs.length) break;
+      let targetInput = instance.inputs[pos + pasteStartIndex];
+
+      // paste value
+      targetInput.value = chars[pos];
+    }
+
+    // focus on the next input after pasting value
+    instance.inputs[scheduledFocus].focus();
   }
 
-  updateInput() {
-    let inputValue = Array.from(this.inputs).reduce((otp, input) => {
+  static handleKeydown(instance, currentInput, i, e) {
+    const inputLength = instance.inputs.length;
+
+    if (e.keyCode === keycodes.backspace && i > 0) {
+      OtpInput.shiftInputValues(instance, i);
+      instance.inputs[i - 1].focus();
+      return;
+    }
+
+    if (e.keyCode === keycodes.delete && i !== inputLength - 1) {
+      OtpInput.shiftInputValues(instance, i + 1);
+      currentInput.select();
+      e.preventDefault();
+      return;
+    }
+
+    if (e.keyCode === keycodes.left) {
+      if (i > 0) {
+        e.preventDefault();
+        instance.inputs[i - 1].focus();
+        instance.inputs[i - 1].select();
+      }
+      return;
+    }
+
+    if (e.keyCode === keycodes.right) {
+      if (i + 1 < inputLength) {
+        e.preventDefault();
+        instance.inputs[i + 1].focus();
+        instance.inputs[i + 1].select();
+      }
+      return;
+    }
+  }
+
+  static shiftInputValues(instance, startIndex) {
+    for (let pos = startIndex; pos < instance.inputs.length - 1; pos++) {
+      instance.inputs[pos].value = instance.inputs[pos + 1].value;
+    }
+    instance.inputs[instance.inputs.length - 1].value = '';
+    OtpInput.updateInput(instance);
+  }
+
+  static updateInput(instance) {
+    let inputValue = Array.from(instance.inputs).reduce((otp, input) => {
       otp += input.value.length ? input.value : ' ';
       return otp;
     }, '');
-    this.hiddenInput.value = inputValue;
-    if (this.hiddenInput.value.length === this.inputQty) {
-      this.checkForMatch();
+    instance.hiddenInput.value = inputValue;
+    if (instance.hiddenInput.value.length === instance.inputQty) {
+      instance.checkForMatch();
     }
   }
 
