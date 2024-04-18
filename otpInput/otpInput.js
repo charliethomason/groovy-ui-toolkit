@@ -9,23 +9,50 @@ export class OtpInput {
     this.hiddenInput = document.createElement('input');
     this.hiddenInput.type = 'hidden';
     this.hiddenInput.name = 'otp';
+    this.submitButton = document.createElement('button');
+    this.submitButton.type = 'submit';
+    this.submitButton.textContent = 'Submit';
+    this.submitButton.className = 'otp-submit-btn';
+    this.submitButton.id = 'otp-submit-btn';
+    this.form.appendChild(this.hiddenInput);
+    this.form.appendChild(this.submitButton);
     this.otp = '';
-    this.inputMatchesOtp = false;
+    this.readyToCheck = false;
   }
 
-  createElements() {
-    for (let i = 0; i < this.inputQty; i++) {
+  setOtp(otp) {
+    this.otp = otp;
+  }
+
+  resetForm() {
+    this.hiddenInput.value = '';
+    this.inputs.forEach((input) => {
+      input.value = '';
+    });
+    this.readyToCheck = false;
+  }
+
+  static getReadyToCheck(instance) {
+    return instance.readyToCheck;
+  }
+
+  static createElements(instance) {
+    for (let i = 0; i < instance.inputQty; i++) {
       const inputElem = document.createElement('input');
       inputElem.type = 'number';
       inputElem.className = 'otp-input';
       inputElem.maxLength = 1;
       inputElem.pattern = 'd*';
       inputElem.id = `otp-input-${i}`;
-      this.form.appendChild(inputElem);
-      this.inputs.push(inputElem);
+      instance.form.appendChild(inputElem);
+      instance.inputs.push(inputElem);
     }
-    document.body.appendChild(this.form);
-    OtpInput.addEventListeners(this);
+    document.body.appendChild(instance.form);
+    instance.submitButton = document.querySelector('#otp-submit-btn');
+    OtpInput.addEventListeners(instance);
+
+    // Call updateInput to disable the submit button if readyToCheck is false
+    OtpInput.updateInput(instance);
   }
 
   static addEventListeners(instance) {
@@ -124,27 +151,52 @@ export class OtpInput {
   }
 
   static updateInput(instance) {
-    let inputValue = Array.from(instance.inputs).reduce((otp, input) => {
-      otp += input.value.length ? input.value : ' ';
-      return otp;
+    let inputValue = Array.from(instance.inputs).reduce((acc, input) => {
+      acc += input.value.length ? input.value : ' ';
+      return acc;
     }, '');
     instance.hiddenInput.value = inputValue;
-    if (instance.hiddenInput.value.length === instance.inputQty) {
-      instance.checkForMatch();
+    instance.readyToCheck = instance.inputs.every(
+      (input) => input.value !== ''
+    );
+
+    // Disable the submit button if readyToCheck is false
+    instance.submitButton.disabled = !instance.readyToCheck;
+  }
+
+  static checkForMatch(instance) {
+    if (instance.otp === instance.hiddenInput.value) {
+      return true;
+    } else {
+      return false;
     }
   }
 
-  checkForMatch() {
-    if (this.otp === this.hiddenInput.value) {
-      this.inputMatchesOtp = true;
+  submitOtp() {
+    let result;
+    if (OtpInput.getReadyToCheck(this)) {
+      if (OtpInput.checkForMatch(this)) {
+        this.otp = ''; // reset the otp value after a successful attempt
+        this.resetForm();
+        result = true;
+      } else {
+        alert('Incorrect One Time Password (OTP)');
+        this.resetForm();
+        result = false;
+      }
     } else {
-      this.inputMatchesOtp = false;
+      alert('Please fill in all fields');
     }
+    return result;
   }
 
   renderAndUse() {
     document.addEventListener('DOMContentLoaded', () => {
-      this.createElements();
+      OtpInput.createElements(this);
+    });
+    this.form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.submitOtp();
     });
   }
 }
