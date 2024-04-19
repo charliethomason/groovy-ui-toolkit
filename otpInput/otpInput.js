@@ -167,10 +167,8 @@ export class OtpInput {
 
   static checkForMatch(instance) {
     if (instance.otp === instance.hiddenInput.value) {
-      console.log('OTP Matched');
       return true;
     } else {
-      console.log('OTP Not Matched');
       return false;
     }
   }
