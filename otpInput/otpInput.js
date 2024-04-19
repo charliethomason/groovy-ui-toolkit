@@ -47,6 +47,10 @@ export class OtpInput {
       instance.form.appendChild(inputElem);
       instance.inputs.push(inputElem);
     }
+
+    // Append the submit button after the inputs
+    instance.form.appendChild(instance.submitButton);
+
     document.body.appendChild(instance.form);
     instance.submitButton = document.querySelector('#otp-submit-btn');
     OtpInput.addEventListeners(instance);
