@@ -95,13 +95,10 @@ export class OtpInput {
 
     let scheduledFocus = Math.min(instance.inputs.length - 1, i + chars.length);
 
-    // start pasting from index 0 if the current input is not the first input
-    let pasteStartIndex = currentInput !== 0 ? 0 : i;
-
     // loop through the array and assign each character to the input
     for (let pos = 0; pos < chars.length; pos++) {
-      if (pos + pasteStartIndex >= instance.inputs.length) break;
-      let targetInput = instance.inputs[pos + pasteStartIndex];
+      if (pos >= instance.inputs.length) break;
+      let targetInput = instance.inputs[pos];
 
       // paste value
       targetInput.value = chars[pos];
@@ -170,8 +167,10 @@ export class OtpInput {
 
   static checkForMatch(instance) {
     if (instance.otp === instance.hiddenInput.value) {
+      console.log('OTP Matched');
       return true;
     } else {
+      console.log('OTP Not Matched');
       return false;
     }
   }
@@ -180,7 +179,6 @@ export class OtpInput {
     let result;
     if (OtpInput.getReadyToCheck(this)) {
       if (OtpInput.checkForMatch(this)) {
-        this.otp = ''; // reset the otp value after a successful attempt
         this.resetForm();
         result = true;
       } else {
